@@ -2,28 +2,34 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import ImageGrid
+from matplotlib.ticker import AutoMinorLocator
 
 import numpy as np
 import glob as glob
+import re as re
 import skimage.io as skio
 from skimage.filters import threshold_otsu
 from skimage import feature
 from scipy import ndimage
 from sklearn.cluster import KMeans
 import skimage.exposure as skex
+import datetime
 
-# Define functions for image analysis 
+#### Define functions for analysis 
 
 def readOneRing(ringindex,FILEPATH,FILENAME):
     # Read in all images corresponding to a particular chemostat ring
-    # Inputs are tiff images whose filenames end in '...ringindex_*.tiff' 
-    # where 'ringindex' identifies the ring
+    # Inputs are tiff images whose filenames are of the form '...ringindex_*_imagenumber.tiff' 
+    # where 'ringindex' and 'imagenumber' identify the ring and sequence number 
 
     # Output is an image collection, max and min values, and the number of files
     # Output image collection shape is (sequence, x ,y)
     
     listfiles=glob.glob(FILEPATH+FILENAME+'_'+str(int(ringindex))+'_*.tiff')    
     numberoffiles=len(listfiles)
+
+    # Sort filenames by sequence number of images
+    listfiles=sorted(listfiles,key=lambda x:float(re.findall(r'\d\d\d\d\d\.',x)[0]))
 
     # Transposed for new Hama camera the images must be transposed 90 degrees 
     ic=np.transpose(skio.imread_collection(listfiles),axes=(0,2,1)) 
@@ -52,7 +58,7 @@ def findEdgesFluor(imagestack,max_ind,min_ind,imagenumber,sigma=10,number_of_sli
     else:
         denoise=ndimage.median_filter(binimg,size=6) # <<<<===== size=6 for low-constrast
 
-    edges=feature.canny(denoise,sigma=sigma) # Find edges using skimage canny. # <<<<<<<<<<==========
+    edges=feature.canny(denoise,sigma=sigma) # Find edges using skimage canny. # <<<<<<<<========
 
     shape=np.shape(edges)
     limiter=np.zeros(number_of_slices)
@@ -75,7 +81,6 @@ def findEdgesFluor(imagestack,max_ind,min_ind,imagenumber,sigma=10,number_of_sli
     else:
         centrepeaks=centrepeaks
     centre=np.average(centrepeaks)
-
 
     ### Angle calculation
 
@@ -156,21 +161,92 @@ def calculateFluxes(newstack,numberoffiles,roicoords):
 
     return(flux)
 
+#### Define functions for plotting 
+
+def plotInitialise(figW,figH):
+
+    plt.close("all")
+    figure_options={'figsize':(figW,figH)} # figure size in inches. A4=11.7x8.3, A5=8.3,5.8
+    font_options={'size':'14','family':'sans-serif','sans-serif':'Arial'}
+    plt.rc('figure', **figure_options)
+    plt.rc('font', **font_options)
+
+def plotFormat(ax,xlabel=False,
+                    ylabel=False,
+                    xlim=False,
+                    ylim=False,
+                    title=False,
+                    xticks=False,
+                    yticks=False,
+                    logx=False,
+                    logy=False,
+                    logxy=False,
+                    symlogx=False,
+                    legend=False):
+
+    # Set titles and labels
+    if title!=False:
+        ax.set_title(title)
+    if xlabel!=False:
+        ax.set_xlabel(xlabel, labelpad=12)
+    if ylabel!=False:    
+        ax.set_ylabel(ylabel, labelpad=12)
+
+    # Set axis limits
+    if xlim!=False:
+        ax.set_xlim(xlim)
+    if ylim!=False:
+        ax.set_ylim(ylim)
+
+    # Set tick values
+    if xticks!=False:
+        ax.set_xticks(xticks)
+    if yticks!=False:
+        ax.set_yticks(yticks)
+
+    # Set line thicknesses
+    #ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter("%1.e"))
+    #ax.axhline(linewidth=2, color='k')      
+    #ax.axvline(linewidth=2, color='k')
+    ax.spines['bottom'].set_linewidth(2)
+    ax.spines['top'].set_linewidth(2)
+    ax.spines['left'].set_linewidth(2)
+    ax.spines['right'].set_linewidth(2) 
+
+    # Set ticks
+    if logx==True:
+        ax.set_xscale("log")
+
+    elif logy==True:
+        ax.set_yscale("log")
+
+    elif logxy==True:
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+    
+    elif symlogx==True:
+        ax.set_xscale("symlog",linthreshx=1e-4)
+        ax.set_yscale("log")
+
+    else:
+        minorLocatorx=AutoMinorLocator(2) # Number of minor intervals per major interval
+        minorLocatory=AutoMinorLocator(2)
+        ax.xaxis.set_minor_locator(minorLocatorx)
+        ax.yaxis.set_minor_locator(minorLocatory)
+
+    ax.tick_params(which='major', width=2, length=8, pad=9,direction='in',top='on',right='on')
+    ax.tick_params(which='minor', width=2, length=4, pad=9,direction='in',top='on',right='on')
+
+    if legend==True:
+        ax.legend(loc='upper right', fontsize=14,numpoints=1) ### Default 'best'
 
 
-def plotTotalImages(data,numberoffiles,RINGSTOREAD):
+def plotTotalImages(data,numberoffiles,RINGSTOREAD,OUTPATH,save=True):
 
     number_rows = len(RINGSTOREAD)
     number_cols = numberoffiles
 
-    plt.close("all")
-
-    my_dpi=150
-
-    figure_options={'figsize':(11.7,11.7/number_cols*number_rows)} #figure size in inches. A4=11.7x8.3. 
-    font_options={'size':'14','family':'sans-serif','sans-serif':'Arial'}
-    plt.rc('figure', **figure_options)
-    plt.rc('font', **font_options)
+    plotInitialise(8.3,8.3/number_cols*number_rows)
 
     ######### CALL PLOTS #########
 
@@ -184,5 +260,56 @@ def plotTotalImages(data,numberoffiles,RINGSTOREAD):
             grid[j+i*number_cols].set_xticks([])
             grid[j+i*number_cols].set_yticks([])
 
-    plt.show()
+    if save==True:
+        print()
+        print('Saving...')
+        print()
+        filename_im=datetime.datetime.now().strftime("%Y%m%d_%H%M%S")+'_imagetotal.pdf'
+        plt.savefig(OUTPATH+filename_im,dpi=150,bbox_inches='tight')
+    else:
+        plt.show()
+
+def plotSingleImage(data,RING,CYCLE,OUTPATH,save=True):
+
+    plotInitialise(8.3,5.8)
+
+    ######### CALL PLOTS #########
+
+    fig=plt.figure()
+
+    imagesring=data['Ring '+str(RING)]
+    plt.imshow(imagesring[CYCLE,:,:]).set_clim(0,4000)
+
+    if save==True:
+        print()
+        print('Saving...')
+        print()
+        filename_im=datetime.datetime.now().strftime("%Y%m%d_%H%M%S")+'_image.pdf'
+        plt.savefig(OUTPATH+filename_im,dpi=150,bbox_inches='tight')
+    else:
+        plt.show()
+
+def plotFluxes(flux,RINGSTOREAD,OUTPATH,save=True):
+
+    number_rows = len(RINGSTOREAD)
+
+    plotInitialise(8.3,5.8)
+
+    ######### CALL PLOTS #########
+
+    fig=plt.figure(); ax=fig.add_subplot(1,1,1) 
+
+    for i in range(number_rows):
+        ax.plot(flux['Ring '+str(RINGSTOREAD[i]+1)][:,4],'o-',label='Ring '+str(RINGSTOREAD[i]+1))
+
+    plotFormat(ax,xlabel='Cycle',ylabel='RFU',legend=True)
+
+    if save==True:
+        print()
+        print('Saving...')
+        print()
+        filename_im=datetime.datetime.now().strftime("%Y%m%d_%H%M%S")+'_ring'+''.join([str(item+1) for item in RINGSTOREAD])+'_flux.pdf'
+        plt.savefig(OUTPATH+filename_im,dpi=150,bbox_inches='tight')
+    else:
+        plt.show()
 
