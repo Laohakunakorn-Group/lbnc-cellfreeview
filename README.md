@@ -1,7 +1,7 @@
 # lbnc-cellfreeview
 View and analyse data from the cell-free chemostats at [LBNC](http://lbnc.epfl.ch/).
 
-<img src="/fig/fig.png" width="100" alt="Cell-free chemostats" align="center" hspace="40" vspace="15">
+<img src="/fig/fig.png" width="1000" alt="Cell-free chemostats" align="center" hspace="40" vspace="15">
 
 This script analyses sequential timelapse images. The signal appears as fluorescence within a microfluidic channel, which is used to rotate and centre the image stack. ROIs are defined in the bright and dark regions, and intensities averaged within them. The script produces timeseries data of fluorescence intensity for each microchemostat reactor as well as merged images and plots. Analysis of a calibration experiment determines the dilution rate within each reactor. This code is used to analyse experiments run on chips as described in [Niederholtmeyer et al. 2013](https://www.pnas.org/content/110/40/15985) and [Niederholtmeyer et al. 2015](https://elifesciences.org/articles/09771).  
 
