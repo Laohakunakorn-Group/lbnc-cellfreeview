@@ -410,7 +410,7 @@ def plotTotalImages(data,numberoffiles,RINGSTOREAD,OUTPATH,minmax,save=True):
     for i in range(number_rows):
         imagesring=data['Ring '+str(RINGSTOREAD[i]+1)]
         for j in range(number_cols):
-            grid[j+i*number_cols].imshow(imagesring[j,:,:]).set_clim(minmax[0]*0.9,minmax[1]*1.1)
+            grid[j+i*number_cols].imshow(imagesring[j,:,:]).set_clim(minmax[0]*0.9,minmax[1])
             grid[j+i*number_cols].set_xticks([])
             grid[j+i*number_cols].set_yticks([])
 
@@ -429,7 +429,7 @@ def plotSingleImage(data,RING,CYCLE,OUTPATH,roicoords,minmax,save=True):
     fig=plt.figure(); ax=fig.add_subplot(1,1,1)
 
     imagesring=data['Ring '+str(RING)]
-    ax.imshow(imagesring[CYCLE,:,:]).set_clim(minmax[0]*0.9,minmax[1]*1.1)
+    ax.imshow(imagesring[CYCLE,:,:]).set_clim(minmax[0]*0.9,minmax[1])
     ax.add_patch(patches.Rectangle((roicoords[0],roicoords[2]),
                             roicoords[1]-roicoords[0],roicoords[3]-roicoords[2],fill=False,edgecolor='red'))
     ax.add_patch(patches.Rectangle((roicoords[4],roicoords[6]),
