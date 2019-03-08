@@ -494,8 +494,7 @@ def writeLog(ringindex,OUTPATH,numberoffiles,shape,minvalue,maxvalue,listfiles,m
 
     today=datetime.datetime.today()
 
-    with open(OUTPATH+'log'+datetime.datetime.now().strftime("%Y%m%d")
-                +'_Ring'+str(int(ringindex+1))+'.txt', 'w') as LOG:
+    with open(OUTPATH+'log'+'_Ring'+str(int(ringindex+1))+'.txt', 'w') as LOG:
 
         LOG.write('Chemostat Data Analysis')
         LOG.write('\n')
@@ -540,8 +539,7 @@ def writeLogCalib(ringindex,OUTPATH,params,ratios,ref_img,offset):
 
     today=datetime.datetime.today()
 
-    with open(OUTPATH+'log'+datetime.datetime.now().strftime("%Y%m%d")
-                +'_Ring'+str(int(ringindex+1))+'.txt', 'a') as LOG:
+    with open(OUTPATH+'log'+'_Ring'+str(int(ringindex+1))+'.txt', 'a') as LOG:
 
         [a,b,sa,sb,ksa,ksb,r] = params['Ring '+str(ringindex+1)]
         [dilratio, deltadilratio, deltakdilratio] = ratios['Ring '+str(ringindex+1)]

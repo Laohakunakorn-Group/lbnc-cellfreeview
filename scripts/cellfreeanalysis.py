@@ -96,6 +96,13 @@ def main():
                 (newX,fits,ratios,params)=cfv.calibrateDilute(flux['Ring '+str(ringindex+1)],OFFSET,ringindex,fits,ratios,params)
                 cfv.plotCalib(flux,newX,fits,ringindex,OUTPATH,save=True)
                 cfv.writeLogCalib(ringindex,OUTPATH,params,ratios,REFIMG,OFFSET)
+            with open(OUTPATH+'log'+'totalcalib.txt', 'w') as LOG:
+                LOG.write('Total dilution ratios')
+                LOG.write('\n')
+                for ringindex in RINGSTOREAD:
+                    LOG.write('Ring '+str(ringindex+1)+': '+str('{:.4f}'.format(ratios['Ring '+str(ringindex+1)][0])))
+                    LOG.write('\n')
+                LOG.closed
 
         elif commands_str=='2':
             # 2. Save all plots
