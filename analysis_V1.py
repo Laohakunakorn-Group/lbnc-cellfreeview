@@ -1,10 +1,10 @@
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 import numpy as np
-import skimage.io as skio
 import pandas as pd
+import tqdm as tqdm
+import pyfiglet
 
 import cellfreeview as cfv
 
@@ -12,11 +12,12 @@ import cellfreeview as cfv
 FILENAME = 'compRRR4calib'
 FILEPATH = './imgs/'
 OUTPATH = './output/'
+RINGS = [1,2,3,4,5,6,7,8]
+REFIMG = 0 # Fluorescence reference image number
+MODE = 1
 CROPSIZEH = 400 # height ### default 400
 CROPSIZEW = 280 # width ### default 280
-RINGSTOREAD = [0,1,2,3,4,5,6,7]
-REFERENCECYCLE = 0
-ROI_bx=22 # bright ROI x 
+ROI_bx=22 # bright ROI x
 ROI_by=120 # bright ROI y
 ROI_dx=22 # dark ROI
 ROI_dy=120 # dark ROI
@@ -25,23 +26,37 @@ roicoords = cfv.calculateROI(CROPSIZEW,CROPSIZEH,[ROI_bx,ROI_by,ROI_dx,ROI_dy])
 def main():
 
     print()
-    print('Welcome to the chemostat data analysis pipeline')
+    print(pyfiglet.figlet_format("LBNC"))
+    print('Welcome to the LBNC chemostat data analysis pipeline')
     print('Inputs are tiff images whose filenames are of the form "...ringindex_*_imagenumber.tiff" ')
     print()
+
+
+    if MODE==1:
+        print('Mode 1: reference fluor image')
+    elif MODE==2:
+        print('Mode 2: individual centres')
+    elif MODE==3:
+        print('Mode 3: edgefile')
 
     ### Read requested images into image collection
 
     data = {}
     flux = {}
-    for ringindex in RINGSTOREAD:
-        print('Reading ring '+str(ringindex+1))
+    RINGSTOREAD = [item-1 for item in RINGS]
+
+    print('Reading data...')
+    for ringindex in tqdm.tqdm(RINGSTOREAD):
         ic,max_ind,min_ind,numberoffiles=cfv.readOneRing(ringindex,FILEPATH,FILENAME)
-        
-        REFERENCECYCLE = 0
-        a,b = cfv.findEdgesFluor(ic,max_ind[REFERENCECYCLE],min_ind[REFERENCECYCLE],REFERENCECYCLE)
-        angle = a*np.ones(numberoffiles)
-        centre = b*np.ones(numberoffiles)
         shape = np.shape(ic[0])
+
+        # For each ring, can get angle/centre from four sources:
+        # 1. Fluorescence from reference image
+        # 2. Fluorescence from each frame individually
+        # 3. From edgefile
+        # 4. From brightfield reference image
+
+        angle,centre = cfv.getAnglesCentres(ic,max_ind,min_ind,numberoffiles,ringindex,REFIMG,OUTPATH,MODE)
 
         data['Ring '+str(ringindex+1)] = cfv.rotateAndCrop(numberoffiles,ic,CROPSIZEH,CROPSIZEW,angle,shape,centre)
         flux['Ring '+str(ringindex+1)] = cfv.calculateFluxes(data['Ring '+str(ringindex+1)],numberoffiles,roicoords)
@@ -49,11 +64,12 @@ def main():
         dataframe=pd.DataFrame(flux['Ring '+str(ringindex+1)],
                                         columns=['Avg bright',
                                                  'Stdev bright',
-                                                 'Avg dark', 
-                                                 'Stdev dark', 
-                                                 'Avg dark-corrected intensity', 
+                                                 'Avg dark',
+                                                 'Stdev dark',
+                                                 'Avg dark-corrected intensity',
                                                  'Error dark-corrected'])
         dataframe.to_csv(path_or_buf=OUTPATH+'flux_ring'+str(ringindex+1)+'.csv', sep='\t', index_label='Cycle')
+
 
     ### Interactive main menu
 
@@ -79,7 +95,7 @@ def main():
             cfv.plotTotalImages(data,numberoffiles,RINGSTOREAD,OUTPATH,save=False)
 
         elif commands_str=='4':
-            # 4. Plot single image
+            # 4. Plot single image and view ROI
             ring=input('Please select ring (1-8). Press ENTER to cancel: ')
             if ring=='':
                 pass
@@ -88,7 +104,7 @@ def main():
                 if CYCLE=='':
                     pass
                 else:
-                    cfv.plotSingleImage(data,ring,int(CYCLE),OUTPATH,save=False)
+                    cfv.plotSingleImage(data,ring,int(CYCLE),OUTPATH,roicoords,save=False)
 
         elif commands_str=='5':
             # 5. Save all plots
@@ -112,7 +128,7 @@ def main_menu():
     print('1. Plot intensity-time graph for individual ring')
     print('2. Plot total intensity-time graph')
     print('3. Plot all images')
-    print('4. Plot single image')
+    print('4. Plot single image and view ROI')
     print('5. Save all plots')
     print('Press ENTER to exit without saving.')
     print()
@@ -120,4 +136,4 @@ def main_menu():
 # Call main function.
 
 if __name__=='__main__':
-    main()  
+    main()

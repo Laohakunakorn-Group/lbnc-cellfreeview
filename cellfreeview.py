@@ -1,10 +1,13 @@
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 from mpl_toolkits.axes_grid1 import ImageGrid
 from matplotlib.ticker import AutoMinorLocator
 
 import numpy as np
+import pandas as pd
+import math as math
 import glob as glob
 import re as re
 import skimage.io as skio
@@ -115,6 +118,57 @@ def findEdgesFluor(imagestack,max_ind,min_ind,imagenumber,sigma=10,number_of_sli
     angle_avg=np.average(angles)
 
     return(angle_avg,centre)
+
+def getAnglesCentres(ic,max_ind,min_ind,numberoffiles,ringindex,REFIMG,OUTPATH,MODE):
+    # Get angles and centres for each image according to MODE 1-4:
+    # 1. Fluorescence from reference image
+    # 2. Fluorescence from each frame individually
+    # 3. From edgefile
+    # 4. From brightfield reference image
+    # Returns (angle,centre) arrays.
+
+    angle=np.ones(numberoffiles)
+    centre=np.ones(numberoffiles)
+
+    if MODE==1:
+
+        a,b = findEdgesFluor(ic,max_ind[REFIMG],min_ind[REFIMG],REFIMG)
+
+        if math.isnan(a)==True:
+            a=0
+            print('Cannot determine angle for ring '+str(ringindex+1))
+        angle = a*angle
+
+        if math.isnan(b)==True:
+            b=shape[0]/2
+            print('Cannot locate centre for ring '+str(ringindex+1))
+        centre = b*centre
+
+    elif MODE==2:
+
+        for i in range(numberoffiles):
+            angle[i],centre[i] = findEdgesFluor(ic,max_ind[i],min_ind[i],i)
+            if math.isnan(angle[i])==True:
+                angle[i]=0
+                print('Cannot determine angle for ring '+str(ringindex+1)+', frame '+str(i))
+
+            if math.isnan(centre[i])==True:
+                centre[i]=shape[0]/2
+                print('Cannot locate centre for ring '+str(ringindex+1)+', frame '+str(i))
+
+        centreframe=pd.DataFrame(columns=['angle','centre'])
+        centreframe['angle']=angle
+        centreframe['centre']=centre
+        centreframe.to_csv(path_or_buf=OUTPATH+'centres_'+str(ringindex+1)+'.csv', sep='\t')
+
+    elif MODE==3:
+
+        centreframe=pd.read_csv(OUTPATH+'centres_'+str(ringindex+1)+'.csv', sep='\t')
+        angle=centreframe['angle']
+        centre=centreframe['centre']
+
+    return(angle,centre)
+
 
 def rotateAndCrop(numberoffiles,imagestack,CROPSIZEH,CROPSIZEW,angle,shape,centre):
     # Rotate and crop images according to ROI, angle, and centre information
@@ -253,6 +307,7 @@ def plotTotalImages(data,numberoffiles,RINGSTOREAD,OUTPATH,save=True):
     fig=plt.figure(1,(number_cols,number_rows))
 
     grid=ImageGrid(fig,111,nrows_ncols=(number_rows,number_cols),axes_pad=0.001)
+    print('Plotting images...')
     for i in range(number_rows):
         imagesring=data['Ring '+str(RINGSTOREAD[i]+1)]
         for j in range(number_cols):
@@ -269,16 +324,18 @@ def plotTotalImages(data,numberoffiles,RINGSTOREAD,OUTPATH,save=True):
     else:
         plt.show()
 
-def plotSingleImage(data,RING,CYCLE,OUTPATH,save=True):
+def plotSingleImage(data,RING,CYCLE,OUTPATH,roicoords,save=True):
 
     plotInitialise(8.3,5.8)
 
     ######### CALL PLOTS #########
 
-    fig=plt.figure()
+    fig=plt.figure(); ax=fig.add_subplot(1,1,1) 
 
     imagesring=data['Ring '+str(RING)]
-    plt.imshow(imagesring[CYCLE,:,:]).set_clim(0,4000)
+    ax.imshow(imagesring[CYCLE,:,:]).set_clim(0,4000)
+    ax.add_patch(patches.Rectangle((roicoords[0],roicoords[2]),roicoords[1]-roicoords[0],roicoords[3]-roicoords[2],fill=False,edgecolor='red'))
+    ax.add_patch(patches.Rectangle((roicoords[4],roicoords[6]),roicoords[5]-roicoords[4],roicoords[7]-roicoords[6],fill=False,edgecolor='red'))
 
     if save==True:
         print()
