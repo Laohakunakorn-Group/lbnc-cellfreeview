@@ -1,2 +1,17 @@
 # lbnc-cellfreeview
-View and analyse data from the cell-free chemostats at LBNC
+View and analyse data from the cell-free chemostats at [LBNC](http://lbnc.epfl.ch/).
+
+This script analyses sequential timelapse images. The signal appears as fluorescence within a microfluidic channel, which is used to rotate and centre the image stack. ROIs are defined in the bright and dark regions, and intensities averaged within them. The script produces timeseries data of fluorescence intensity for each microchemostat reactor as well as merged images and plots. Analysis of a calibration experiment determines the dilution rate within each reactor. This code is used to analyse experiments run on chips as described in [Niederholtmeyer et al. 2013](http://lbnc.epfl.ch) and [Niederholtmeyer et al. 2015](https://elifesciences.org/articles/09771).  
+
+To install dependencies, run
+
+	pip install -r requirements.txt
+
+There are three files:
+
+* cellfreeanalysis.py 	# This is the main script
+* functions.py 			# This contains all the function definitions required by the main script
+* config.py 			# This file is used to set analysis parameters
+
+Running the code generates `*.csv` output data files, `*.pdf` plots and images, and `*.txt` log files. These are directed to an output directory as defined within the config file. 
+

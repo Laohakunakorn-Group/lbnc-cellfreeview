@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
 
 # Import functions and configuration parameters
 try:
-    import cellfreeview as cfv
+    import functions as cfv
 except:
     print('Function file cellfreeview.py not found, or import errors: please check all dependencies are installed.')
     sys.exit()

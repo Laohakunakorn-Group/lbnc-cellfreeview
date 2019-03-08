@@ -1,6 +1,6 @@
-# cellfreeview.py
+# functions.py
 # This file defines all functions used for the chemostat analysis code
-# as called from ellfreeanalysis.py
+# as called from cellfreeanalysis.py
 
 import matplotlib
 matplotlib.use('TkAgg')
