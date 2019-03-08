@@ -1,0 +1,8 @@
+matplotlib==3.0.3
+numpy==1.16.2
+pandas==0.24.1
+scipy==1.2.1
+scikit-image==0.14.2
+scikit-learn==0.20.3
+pyfiglet
+tqdm
