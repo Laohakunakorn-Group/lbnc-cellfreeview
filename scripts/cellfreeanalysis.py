@@ -35,7 +35,7 @@ def main():
 
     print()
     print(pyfiglet.figlet_format("LBNC - EPFL"))
-    print('Welcome to the LBNC chemostat data analysis pipeline V1.0.0, 2019')
+    print('Welcome to the LBNC chemostat data analysis pipeline V1.1.0, 2019')
     print('Make sure you have set required parameters in the config file')
     print('Inputs are tiff images whose filenames are of the form "...ringindex_*_imagenumber.tiff" ')
     print()
@@ -61,7 +61,7 @@ def main():
         ic,max_ind,min_ind,numberoffiles,listfiles=cfv.readOneRing(ringindex,FILEPATH,FILENAME,TRANSPOSE)
         shape = np.shape(ic[0])
 
-        angle,centre = cfv.getAnglesCentres(ic,max_ind,min_ind,numberoffiles,ringindex,REFIMG,OUTPATH,MODE)
+        angle,centre = cfv.getAnglesCentres(ic,max_ind,min_ind,numberoffiles,ringindex,shape,REFIMG,FILEPATH,OUTPATH,EDGEFILE,MODE)
         data['Ring '+str(ringindex+1)] = cfv.rotateAndCrop(numberoffiles,ic,CROPSIZEH,CROPSIZEW,angle,shape,centre)
         flux['Ring '+str(ringindex+1)] = cfv.calculateFluxes(data['Ring '+str(ringindex+1)],numberoffiles,roicoords)
 

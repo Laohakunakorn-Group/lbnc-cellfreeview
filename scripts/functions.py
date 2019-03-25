@@ -23,7 +23,11 @@ from sklearn.cluster import KMeans
 import skimage.exposure as skex
 import datetime
 
-#### Define functions for analysis
+
+#---------------------------------------------------------------------------
+# Define functions for analysis
+#---------------------------------------------------------------------------
+
 
 def readOneRing(ringindex,FILEPATH,FILENAME,TRANSPOSE):
     # Read in all images corresponding to a particular chemostat ring
@@ -38,7 +42,7 @@ def readOneRing(ringindex,FILEPATH,FILENAME,TRANSPOSE):
 
     # Sort filenames by sequence number of images
     listfiles=sorted(listfiles,key=lambda x:float(re.findall(r'\d\d\d\d\d\.',x)[0]))
-
+ 
     # Transposed for new Hama camera the images must be transposed 90 degrees
     ic=np.transpose(skio.imread_collection(listfiles),axes=TRANSPOSE)
 
@@ -124,11 +128,12 @@ def findEdgesFluor(imagestack,max_ind,min_ind,imagenumber,sigma=10,number_of_sli
 
     return(angle_avg,centre)
 
-def getAnglesCentres(ic,max_ind,min_ind,numberoffiles,ringindex,REFIMG,OUTPATH,MODE):
+def getAnglesCentres(ic,max_ind,min_ind,numberoffiles,ringindex,shape,REFIMG,FILEPATH,OUTPATH,EDGEFILE,MODE):
     # Get angles and centres for each image according to MODE 1-4:
     # 1. Fluorescence from reference image
     # 2. Fluorescence from each frame individually
-    # 3. From edgefile
+    # 3. From timeseries edgefile
+    # 4. From individual edgefile
     # 4. From brightfield reference image
     # Returns (angle,centre) arrays.
 
@@ -164,13 +169,19 @@ def getAnglesCentres(ic,max_ind,min_ind,numberoffiles,ringindex,REFIMG,OUTPATH,M
         centreframe=pd.DataFrame(columns=['angle','centre'])
         centreframe['angle']=angle
         centreframe['centre']=centre
-        centreframe.to_csv(path_or_buf=OUTPATH+'centres_'+str(ringindex+1)+'.csv', sep='\t')
+        centreframe.to_csv(path_or_buf=OUTPATH+'centresTS_'+str(ringindex+1)+'.csv', sep='\t')
 
     elif MODE==3:
 
         centreframe=pd.read_csv(OUTPATH+'centres_'+str(ringindex+1)+'.csv', sep='\t')
         angle=centreframe['angle']
         centre=centreframe['centre']
+
+    elif MODE==4:
+
+        centreframe=pd.read_csv(FILEPATH+EDGEFILE, sep=',')
+        angle=np.ones(numberoffiles)*centreframe['angle'][int(ringindex)]
+        centre=np.ones(numberoffiles)*centreframe['centre'][int(ringindex)]
 
     return(angle,centre)
 
@@ -222,7 +233,11 @@ def calculateFluxes(newstack,numberoffiles,roicoords):
     return(flux)
 
 
-#### Define functions for calibration
+
+#---------------------------------------------------------------------------
+# Define functions for calibration
+#---------------------------------------------------------------------------
+
 
 def wtlsq(x,y,w):
     # Weighted least squares fit coded by hand.
@@ -314,7 +329,12 @@ def calibrateDilute(flux,offset,ringindex, fits, ratios, params):
     return(newX,fits,ratios,params)
 
 
-#### Define functions for plotting
+
+#---------------------------------------------------------------------------
+# Define functions for plotting
+#---------------------------------------------------------------------------
+
+
 
 def plotInitialise(figW,figH):
 

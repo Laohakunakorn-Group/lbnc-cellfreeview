@@ -2,10 +2,13 @@
 
 # Set filename and input and output paths.
 # Inputs are tiff images whose filenames are of the form
-# '...ringindex_*_imagenumber.tiff'
-FILENAME = 'compRRR4calib'
-FILEPATH = './imgs/'
+# '..._ringindex_*_imagenumber.tiff'
+# ringindex is first number to parse, 
+# imagenumber is final number to parse.
+FILENAME = 'compRRR4calib' 
+FILEPATH = './imgs/' # input files
 OUTPATH = './output/'
+EDGEFILE = 'centresGLOB.csv' # comma-delimited edgefile
 
 # Rings to analyse, from 1-8.
 RINGS = [1,2,3,4,5,6,7,8]
@@ -13,8 +16,9 @@ RINGS = [1,2,3,4,5,6,7,8]
 # For each ring, can get angle/centre from four sources:
 # 1. Fluorescence from reference image
 # 2. Fluorescence from each frame individually
-# 3. From edgefile
-# 4. From brightfield reference image (not yet implemented)
+# 3. From timeseries edgefile
+# 4. From global edgefile 
+# 5. From brightfield reference image (not yet implemented)
 MODE = 1
 
 # Fluorescence reference image. The number corresponds to the
@@ -33,3 +37,7 @@ ROI_bx = 22 # bright ROI x
 ROI_by = 120 # bright ROI y
 ROI_dx = 22 # dark ROI
 ROI_dy = 120 # dark ROI
+
+
+
+
