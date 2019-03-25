@@ -2,7 +2,7 @@
 # Runs chemostat analysis pipeline
 
 import matplotlib
-matplotlib.use('TkAgg')
+#matplotlib.use('TkAgg') # uncomment for python plotting; comment for ipython plotting in pylab
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -27,7 +27,7 @@ except:
     sys.exit()
 
 if not os.path.exists(OUTPATH):
-    os.mkdir('./output/')
+    os.mkdir(OUTPATH)
 roicoords = cfv.calculateROI(CROPSIZEW,CROPSIZEH,[ROI_bx,ROI_by,ROI_dx,ROI_dy])
 
 

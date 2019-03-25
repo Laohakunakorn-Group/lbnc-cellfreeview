@@ -3,7 +3,7 @@
 # as called from cellfreeanalysis.py
 
 import matplotlib
-matplotlib.use('TkAgg')
+#matplotlib.use('TkAgg') # uncomment for python plotting; comment for ipython plotting in pylab
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from mpl_toolkits.axes_grid1 import ImageGrid
