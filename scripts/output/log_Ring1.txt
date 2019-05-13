@@ -1,0 +1,54 @@
+Chemostat Data Analysis
+2019-05-13 14:24:51.828593
+
+1. Data properties
+Number of images: 10
+Dimensions: (512, 512)
+Intensity range: 1516.0 to 6403.0
+
+Filenames: ['./imgs/compRRR4calib_0_2_2_00001.tiff', './imgs/compRRR4calib_0_2_2_00002.tiff', './imgs/compRRR4calib_0_2_2_00003.tiff', './imgs/compRRR4calib_0_2_2_00004.tiff', './imgs/compRRR4calib_0_2_2_00005.tiff', './imgs/compRRR4calib_0_2_2_00006.tiff', './imgs/compRRR4calib_0_2_2_00007.tiff', './imgs/compRRR4calib_0_2_2_00008.tiff', './imgs/compRRR4calib_0_2_2_00009.tiff', './imgs/compRRR4calib_0_2_2_00010.tiff']
+
+Mode: 1
+
+2. Image processing steps
+Rotated by 1.212 degrees
+Rotated by 1.212 degrees
+Rotated by 1.212 degrees
+Rotated by 1.212 degrees
+Rotated by 1.212 degrees
+Rotated by 1.212 degrees
+Rotated by 1.212 degrees
+Rotated by 1.212 degrees
+Rotated by 1.212 degrees
+Rotated by 1.212 degrees
+Cropped to rectangle of size 400 px by 280 px
+
+3. Data analysis steps
+Dark subtraction using bright and dark ROIs:
+Bright ROI = 129x151 px
+Dark ROI = 140x260 px
+Dilution calibration results
+Reference image: 0
+Offset: 1
+
+We expect a dilution function of cn/c0=(1-VD/VT)**N.
+The linearisation is therefore Z*log(f)=log(cn/c0)=N*log(1-VD/VT).
+
+WLS fitting to y=a+bx yields the dilution ratio VD/VT.
+The values of a and b are equal to
+a =0.0029
+b =-0.2941
+
+The standard errors are given by
+sa =0.0659
+sb =0.0454
+
+The 95 percent confidence boundaries are given by
+ksa =0.1558
+ksb =0.1073
+
+The linear correlation coefficient of the fit is
+r =-0.9989
+
+The dilution ratio VD/VT is: 0.255 +/- 0.034 (+/- 0.080)
+where the 95 percent confidence interval is given in brackets

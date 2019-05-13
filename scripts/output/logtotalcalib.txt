@@ -1,0 +1,9 @@
+Total dilution ratios
+Ring 1: 0.2548
+Ring 2: 0.2826
+Ring 3: 0.2594
+Ring 4: 0.2895
+Ring 5: 0.2978
+Ring 6: 0.3075
+Ring 7: 0.2919
+Ring 8: 0.2951

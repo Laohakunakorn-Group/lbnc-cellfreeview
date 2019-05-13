@@ -1,6 +1,6 @@
-# Large example images folder
-imgs/
-output/
+# Large example images folder, uncomment to ignore
+#imgs/
+#output/
 
 
 # Byte-compiled / optimized / DLL files
